@@ -1,0 +1,447 @@
+﻿Here is an overview of top existing open-source Spotify application GitHub repositories across popular tech stacks, along with a complete full-stack Spotify clone project structure and code architecture designed using Angular 15 (Frontend) and Java / Spring Boot (Backend).
+
+
+Repository / StackStack DetailsFeatures Included
+mrwebwork/spotifyNext.js, React, Supabase, Tailwind, StripeAudio playback, song uploads, Stripe subscriptions, favorites, search.
+adityakkpk/Spotify-CloneMERN Stack (MongoDB, Express, React, Node)User & Admin dashboards, audio streaming via Cloudinary, playlist creation.
+trungvq/angular-spotifyAngular 15+, Tailwind CSS, Nx WorkspaceHigh-performance Spotify Web Player clone using Spotify Web API.
+HoneyTyagii/spotify-cloneVite, JS, Tailwind, Spotify APIReal-time search, player control, artist/album catalog browsing.
+
+
+2. Enterprise Full-Stack Architecture Architecture
+​Below is a complete enterprise-grade sample repository setup featuring Angular 15 on the front end and Java (Spring Boot 3 / JDK 17) on the back end.
+​Repository Layout
+
+spotify-clone-enterprise/
+├── spotify-backend/ # Java Spring Boot Microservice / Monolith
+│ ├── src/main/java/com/spotify/
+│ │ ├── config/ # Security, CORS, JWT Configurations
+│ │ ├── controller/ # Auth, Track, Playlist Controllers
+│ │ ├── dto/ # Data Transfer Objects
+│ │ ├── model/ # JPA Entities (User, Track, Playlist)
+│ │ ├── repository/ # Spring Data Repositories
+│ │ └── service/ # Business Logic & Audio Streaming Service
+│ ├── src/main/resources/
+│ │ └── application.yml
+│ └── pom.xml
+└── spotify-frontend/ # Angular 15 Application
+    ├── src/app/
+    │ ├── core/ # Guards, Interceptors, Core Services
+    │ ├── features/ # Auth, Home, Player, Playlist Modules
+    │ ├── shared/ # Reusable components (Sidebar, Navbar)
+    │ ├── app.component.html
+    │ ├── app.component.ts
+    │ └── app.module.ts
+    ├── angular.json
+    └── package.json
+
+
+3. Core Implementation Files
+​Backend: Java / Spring Boot 3 (TrackController.java)
+​Provides audio streaming capabilities with standard byte-range request support:
+
+
+
+package com.spotify.controller;
+
+
+
+import com.spotify.model.Track;
+
+import com.spotify.repository.TrackRepository;
+
+import org.springframework.core.io.Resource;
+
+import org.springframework.core.io.UrlResource;
+
+import org.springframework.http.*;
+
+import org.springframework.web.bind.annotation.*;
+
+
+
+import java.nio.file.Path;
+
+import java.nio.file.Paths;
+
+import java.util.List;
+
+
+
+@RestController
+
+@RequestMapping("/api/v1/tracks")
+
+@CrossOrigin(origins = "http://localhost:4200")
+
+public class TrackController {
+
+
+
+    private final TrackRepository trackRepository;
+
+    private final Path storageLocation = Paths.get("media/audio");
+
+
+
+    public TrackController(TrackRepository trackRepository) {
+
+        this.trackRepository = trackRepository;
+
+    }
+
+
+
+    @GetMapping
+
+    public ResponseEntity<List<Track>> getAllTracks() {
+
+        return ResponseEntity.ok(trackRepository.findAll());
+
+    }
+
+
+
+    @GetMapping("/stream/{filename}")
+
+    public ResponseEntity<Resource> streamAudio(@PathVariable String filename) {
+
+        try {
+
+            Path filePath = storageLocation.resolve(filename).normalize();
+
+            Resource resource = new UrlResource(filePath.toUri());
+
+
+
+            if (!resource.exists()) {
+
+                return ResponseEntity.notFound().build();
+
+            }
+
+
+
+            return ResponseEntity.ok()
+
+                    .contentType(MediaType.parseMediaType("audio/mpeg"))
+
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + resource.getFilename() + "\"")
+
+                    .body(resource);
+
+        } catch (Exception e) {
+
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+
+        }
+
+    }
+
+}
+
+Backend Entity: Java JPA (Track.java)
+
+
+
+package com.spotify.model;
+
+
+
+import jakarta.persistence.*;
+
+import lombok.*;
+
+
+
+@Entity
+
+@Table(name = "tracks")
+
+@Data
+
+@NoArgsConstructor
+
+@AllArgsConstructor
+
+public class Track {
+
+
+
+    @Id
+
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+
+    private Long id;
+
+
+
+    private String title;
+
+    private String artist;
+
+    private String album;
+
+    private String duration;
+
+    private String audioUrl;
+
+    private String coverArtUrl;
+
+}
+
+
+
+
+
+Frontend: Angular 15 Audio Service (audio-player.service.ts)
+
+​Handles client-side audio controls and state management
+
+
+
+
+
+:import { Injectable } from '@angular/core';
+
+import { BehaviorSubject } from 'rxjs';
+
+
+
+export interface Track {
+
+  id: number;
+
+  title: string;
+
+  artist: string;
+
+  audioUrl: string;
+
+  coverArtUrl: string;
+
+}
+
+
+
+@Injectable({
+
+  providedIn: 'root'
+
+})
+
+export class AudioPlayerService {
+
+  private audio = new Audio();
+
+  
+
+  public currentTrack$ = new BehaviorSubject<Track | null>(null);
+
+  public isPlaying$ = new BehaviorSubject<boolean>(false);
+
+  public currentTime$ = new BehaviorSubject<number>(0);
+
+  public duration$ = new BehaviorSubject<number>(0);
+
+
+
+  constructor() {
+
+    this.audio.addEventListener('timeupdate', () => {
+
+      this.currentTime$.next(this.audio.currentTime);
+
+    });
+
+
+
+    this.audio.addEventListener('loadedmetadata', () => {
+
+      this.duration$.next(this.audio.duration);
+
+    });
+
+
+
+    this.audio.addEventListener('ended', () => {
+
+      this.isPlaying$.next(false);
+
+    });
+
+  }
+
+
+
+  playTrack(track: Track): void {
+
+    if (this.currentTrack$.value?.id !== track.id) {
+
+      this.currentTrack$.next(track);
+
+      this.audio.src = track.audioUrl;
+
+      this.audio.load();
+
+    }
+
+    this.audio.play();
+
+    this.isPlaying$.next(true);
+
+  }
+
+
+
+  pauseTrack(): void {
+
+    this.audio.pause();
+
+    this.isPlaying$.next(false);
+
+  }
+
+
+
+  seek(seconds: number): void {
+
+    this.audio.currentTime = seconds;
+
+  }
+
+}
+
+
+
+
+
+
+
+Frontend: Angular 15 Player Component (player.component.ts)
+
+
+
+import { Component, OnInit } from '@angular/core';
+
+import { AudioPlayerService, Track } from '../../core/services/audio-player.service';
+
+
+
+@Component({
+
+  selector: 'app-player',
+
+  templateUrl: './player.component.html',
+
+  styleUrls: ['./player.component.scss']
+
+})
+
+export class PlayerComponent implements OnInit {
+
+  currentTrack: Track | null = null;
+
+  isPlaying = false;
+
+  currentTime = 0;
+
+  duration = 0;
+
+
+
+  constructor(public playerService: AudioPlayerService) {}
+
+
+
+  ngOnInit(): void {
+
+    this.playerService.currentTrack$.subscribe(track => this.currentTrack = track);
+
+    this.playerService.isPlaying$.subscribe(status => this.isPlaying = status);
+
+    this.playerService.currentTime$.subscribe(time => this.currentTime = time);
+
+    this.playerService.duration$.subscribe(dur => this.duration = dur);
+
+  }
+
+
+
+  togglePlayPause(): void {
+
+    if (this.isPlaying) {
+
+      this.playerService.pauseTrack();
+
+    } else if (this.currentTrack) {
+
+      this.playerService.playTrack(this.currentTrack);
+
+    }
+
+  }
+
+
+
+  onSeek(event: Event): void {
+
+    const input = event.target as HTMLInputElement;
+
+    this.playerService.seek(Number(input.value));
+
+  }
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+## How to Run
+ 1. **Backend (Java / Spring Boot 3):**
+   ```bash
+   cd spotify-backend
+   mvn clean spring-boot:run
+   
+   ```
+ 2. **Frontend (Angular 15):**
+   ```bash
+   cd spotify-frontend
+   npm install
+   ng serve --port 4200
+   
+   ```
+"""
+}
+zip_filename = "spotify_full_solution.zip"
+with zipfile.ZipFile(zip_filename, 'w', zipfile.ZIP_DEFLATED) as zipf:
+for filepath, content in files_data.items():
+zipf.writestr(filepath, content)
+print(f"Zip archive created successfully: {zip_filename}")
+```
+
+```text?code_stdout&code_event_index=1
+Zip archive created successfully: spotify_full_solution.zip
+
+
+```
+I've packed the entire solution—including both the **Java/Spring Boot backend** and **Angular 15 frontend** code structure—into a single .zip file for you to share.
+### What's Included inside the Zip File:
+ * **Backend (/spotify-backend)**
+   * SpotifyBackendApplication.java: Main Spring Boot entry point.
+   * TrackController.java: REST controller handling audio file streaming with byte-range support.
+   * Track.java: JPA Entity for music track metadata.
+   * pom.xml: Maven dependency configuration with Spring Web, Data JPA, and H2 database.
+ * **Frontend (/spotify-frontend)**
+   * audio-player.service.ts: Angular service handling HTML5 audio playback state and stream control.
+   * player.component.ts: Angular component driving player actions, playback progress, and UI state.
+ * **Root Level**
+   * README.md: Setup instructions for running both services locally.

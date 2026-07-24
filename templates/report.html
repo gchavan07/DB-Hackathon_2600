@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ filename }} – BMAD Report</title>
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: "Segoe UI", system-ui, sans-serif;
+        background: #0f1117;
+        color: #e2e8f0;
+        min-height: 100vh;
+      }
+
+      /* ── Nav ── */
+      nav {
+        background: #1a1d2e;
+        border-bottom: 1px solid #2d3748;
+        padding: 14px 32px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+      nav .logo {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #63b3ed;
+      }
+      nav a.back {
+        color: #90cdf4;
+        text-decoration: none;
+        font-size: 0.9rem;
+        padding: 6px 14px;
+        border: 1px solid #2d3748;
+        border-radius: 6px;
+        transition: border-color 0.2s;
+      }
+      nav a.back:hover {
+        border-color: #63b3ed;
+      }
+      nav .spacer {
+        flex: 1;
+      }
+
+      /* ── Layout ── */
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 32px 24px;
+        display: grid;
+        grid-template-columns: 1fr 260px;
+        gap: 24px;
+      }
+      @media (max-width: 900px) {
+        .container {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      /* ── Report card ── */
+      .report-card {
+        background: #1a1d2e;
+        border: 1px solid #2d3748;
+        border-radius: 12px;
+        padding: 32px 36px;
+      }
+
+      /* ── Markdown content styles ── */
+      .md-body h1 {
+        font-size: 1.7rem;
+        color: #90cdf4;
+        border-bottom: 1px solid #2d3748;
+        padding-bottom: 10px;
+        margin-bottom: 20px;
+      }
+      .md-body h2 {
+        font-size: 1.25rem;
+        color: #63b3ed;
+        margin: 28px 0 12px;
+      }
+      .md-body h3 {
+        font-size: 1.05rem;
+        color: #68d391;
+        margin: 20px 0 10px;
+      }
+      .md-body h4 {
+        font-size: 0.95rem;
+        color: #f6ad55;
+        margin: 16px 0 8px;
+      }
+      .md-body p {
+        line-height: 1.7;
+        margin-bottom: 12px;
+        color: #cbd5e0;
+      }
+      .md-body ul,
+      .md-body ol {
+        padding-left: 24px;
+        margin-bottom: 12px;
+        color: #cbd5e0;
+      }
+      .md-body li {
+        margin-bottom: 6px;
+        line-height: 1.6;
+      }
+      .md-body strong {
+        color: #e2e8f0;
+      }
+      .md-body em {
+        color: #a0aec0;
+      }
+      .md-body code {
+        background: #0f1117;
+        color: #68d391;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 0.88em;
+      }
+      .md-body pre {
+        background: #0f1117;
+        border: 1px solid #2d3748;
+        border-radius: 8px;
+        padding: 16px;
+        overflow-x: auto;
+        margin-bottom: 16px;
+      }
+      .md-body pre code {
+        background: none;
+        padding: 0;
+        color: #a0aec0;
+      }
+      .md-body blockquote {
+        border-left: 4px solid #3182ce;
+        padding: 10px 16px;
+        margin: 12px 0;
+        background: #0f1117;
+        border-radius: 0 8px 8px 0;
+        color: #90cdf4;
+      }
+      .md-body hr {
+        border: none;
+        border-top: 1px solid #2d3748;
+        margin: 24px 0;
+      }
+
+      /* ── Tables ── */
+      .md-body table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+        font-size: 0.88rem;
+      }
+      .md-body th {
+        background: #0f1117;
+        color: #90cdf4;
+        border: 1px solid #2d3748;
+        padding: 10px 14px;
+        text-align: left;
+      }
+      .md-body td {
+        border: 1px solid #2d3748;
+        padding: 9px 14px;
+        color: #cbd5e0;
+      }
+      .md-body tr:nth-child(even) td {
+        background: #161925;
+      }
+
+      /* ── Sidebar ── */
+      .sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        height: fit-content;
+      }
+      .sidebar-card {
+        background: #1a1d2e;
+        border: 1px solid #2d3748;
+        border-radius: 12px;
+        padding: 18px;
+      }
+      .sidebar-card h3 {
+        font-size: 0.9rem;
+        color: #90cdf4;
+        margin-bottom: 12px;
+      }
+      .report-list {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .report-list a {
+        display: block;
+        background: #0f1117;
+        border: 1px solid #2d3748;
+        border-radius: 6px;
+        padding: 8px 10px;
+        color: #90cdf4;
+        text-decoration: none;
+        font-size: 0.78rem;
+        word-break: break-all;
+        transition: border-color 0.2s;
+      }
+      .report-list a:hover {
+        border-color: #63b3ed;
+      }
+      .report-list a.active {
+        border-color: #3182ce;
+        background: #1a2a4a;
+      }
+
+      .btn-download {
+        display: block;
+        width: 100%;
+        text-align: center;
+        background: #2c5282;
+        color: #bee3f8;
+        border: none;
+        border-radius: 8px;
+        padding: 10px;
+        font-size: 0.88rem;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        transition: background 0.2s;
+      }
+      .btn-download:hover {
+        background: #2b4c7e;
+      }
+    </style>
+  </head>
+  <body>
+    <nav>
+      <span class="logo">⚡ BMAD</span>
+      <a class="back" href="/">← Back to Dashboard</a>
+      <span class="spacer"></span>
+      <span style="color: #718096; font-size: 0.82rem">{{ filename }}</span>
+    </nav>
+
+    <div class="container">
+      <!-- Report content -->
+      <div class="report-card">
+        <div class="md-body">{{ html_content | safe }}</div>
+      </div>
+
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <div class="sidebar-card">
+          <h3>📥 Download</h3>
+          <a
+            class="btn-download"
+            href="/report/{{ filename }}"
+            download="{{ filename }}"
+          >
+            ⬇ Download Markdown
+          </a>
+        </div>
+
+        <div class="sidebar-card">
+          <h3>📋 All Reports</h3>
+          <ul class="report-list">
+            {% for report in reports %}
+            <li>
+              <a
+                href="/report/{{ report }}"
+                class="{{ 'active' if report == filename else '' }}"
+              >
+                {{ report }}
+              </a>
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
+      </aside>
+    </div>
+  </body>
+</html>
