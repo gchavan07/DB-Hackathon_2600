@@ -1,4 +1,5 @@
 {
   "gcp_project": "hack-team-novastrike",
-  "vertex_location": "us-central1"
+  "vertex_location": "us-central1",
+  "credentials_path": "/home/chavangaurav747234_gmail_com/.config/gcloud/application_default_credentials.json"
 }

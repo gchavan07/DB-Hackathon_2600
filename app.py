@@ -1,5 +1,5 @@
 """
-BMAD Agent Orchestrator – Browser-Based Web Application
+Knowledge Silos Agent Orchestrator – Browser-Based Web Application
 
 Local:     python app.py  →  http://localhost:5000
 OpenShift: deployed via gunicorn, binds to 0.0.0.0:$PORT (default 8080)
@@ -188,5 +188,5 @@ def api_reports():
 if __name__ == "__main__":
     os.makedirs(INPUT_DOCS_DIR, exist_ok=True)
     os.makedirs(OUTPUT_DIR, exist_ok=True)
-    print(f"🚀  BMAD Web App running at http://{HOST}:{PORT}  (debug={DEBUG_MODE})")
+    print(f"🚀  Knowledge Silos Web App running at http://{HOST}:{PORT}  (debug={DEBUG_MODE})")
     app.run(host=HOST, port=PORT, debug=DEBUG_MODE)

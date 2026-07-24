@@ -1,4 +1,4 @@
-
+﻿
 import os
 from rich.console import Console
 from rich.prompt import Prompt
@@ -9,7 +9,7 @@ from .formatter import save_bmad_markdown
 console = Console()
 
 
-# ── Fallback: keyword-driven extraction from actual document text ─────────
+# â”€â”€ Fallback: keyword-driven extraction from actual document text â”€â”€â”€â”€â”€â”€â”€â”€â”€
 def _extract_analysis_from_docs(ingested_data: dict, instruction: str) -> str:
     """
     When LLM is not configured, extract real content from the documents
@@ -18,7 +18,7 @@ def _extract_analysis_from_docs(ingested_data: dict, instruction: str) -> str:
     all_text = "\n".join(ingested_data.values())
     lines    = all_text.splitlines()
 
-    # ── Collect content per category ──────────────────────────────────────
+    # â”€â”€ Collect content per category â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     confluence_content = ""
     jira_content       = ""
     code_content       = ""
@@ -35,7 +35,7 @@ def _extract_analysis_from_docs(ingested_data: dict, instruction: str) -> str:
         else:
             code_content += content + "\n"
 
-    # ── Helper: extract bullet lines containing a keyword ─────────────────
+    # â”€â”€ Helper: extract bullet lines containing a keyword â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     def extract_mentions(text: str, keywords: list, max_items: int = 8) -> list:
         found, seen = [], set()
         for line in text.splitlines():
@@ -51,7 +51,7 @@ def _extract_analysis_from_docs(ingested_data: dict, instruction: str) -> str:
                         break
         return found
 
-    # ── Extract epics & tickets ────────────────────────────────────────────
+    # â”€â”€ Extract epics & tickets â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     epics, tickets, gaps = [], [], []
     current_epic = None
     for line in jira_content.splitlines():
@@ -64,25 +64,25 @@ def _extract_analysis_from_docs(ingested_data: dict, instruction: str) -> str:
         elif any(k in l.lower() for k in ["missing", "gap", "todo", "blocked", "not implemented", "not done", "in progress"]):
             gaps.append(l)
 
-    # ── Extract tech stack mentions ────────────────────────────────────────
+    # â”€â”€ Extract tech stack mentions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     tech_keywords = ["angular", "react", "spring boot", "java", "node", "mongodb",
                      "postgresql", "firebase", "redis", "kafka", "docker", "kubernetes",
                      "aws", "gcp", "azure", "rest", "graphql", "jwt", "microservice"]
     tech_found = [t for t in tech_keywords if t in all_text.lower()]
 
-    # ── Extract features & scope ───────────────────────────────────────────
+    # â”€â”€ Extract features & scope â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     scope_keywords = ["authentication", "signup", "login", "playlist", "streaming",
                       "search", "recommendation", "download", "podcast", "karaoke",
                       "payment", "subscription", "social", "collaboration", "lyrics"]
     features_found = [f for f in scope_keywords if f in all_text.lower()]
 
-    # ── Extract risks ──────────────────────────────────────────────────────
+    # â”€â”€ Extract risks â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     risk_lines = extract_mentions(all_text, ["risk", "mitigation", "challenge", "concern", "issue"], max_items=6)
 
-    # ── Extract recommendations ────────────────────────────────────────────
+    # â”€â”€ Extract recommendations â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     rec_lines = extract_mentions(all_text, ["recommend", "should", "must", "ensure", "next step", "priority"], max_items=6)
 
-    # ── Extract project name ───────────────────────────────────────────────
+    # â”€â”€ Extract project name â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     project_name = "the project"
     for line in (confluence_content + code_content).splitlines():
         l = line.strip()
@@ -90,12 +90,12 @@ def _extract_analysis_from_docs(ingested_data: dict, instruction: str) -> str:
             project_name = l.lstrip("# ").strip()
             break
 
-    # ── Confluence page headings ───────────────────────────────────────────
+    # â”€â”€ Confluence page headings â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     confluence_pages = [l.lstrip("# ").strip() for l in confluence_content.splitlines()
                         if l.startswith("# ") or l.startswith("## ")]
     confluence_pages = list(dict.fromkeys(confluence_pages))[:10]
 
-    # ── Build analysis output ──────────────────────────────────────────────
+    # â”€â”€ Build analysis output â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     buf = []
 
     buf.append("### 1. Executive Summary")
@@ -109,7 +109,7 @@ def _extract_analysis_from_docs(ingested_data: dict, instruction: str) -> str:
     buf.append("#### 2.1 Tech Stack & Components Identified")
     if tech_found:
         for t in tech_found:
-            buf.append(f"- **{t.title()}** — referenced in source documents")
+            buf.append(f"- **{t.title()}** â€” referenced in source documents")
     else:
         buf.append("- No specific tech stack identifiers found in documents.")
 
@@ -160,7 +160,7 @@ def _extract_analysis_from_docs(ingested_data: dict, instruction: str) -> str:
             buf.append(f"| Open Work | {len(in_progress)} ticket(s) still In Progress/To Do | Prioritise and assign owners |")
         no_ac = [l for l in jira_content.splitlines() if "acceptance criteria" not in l.lower() and l.strip().startswith("### Ticket")]
         buf.append(f"| Acceptance Criteria | {len(no_ac)} ticket(s) may need AC review | Validate criteria against actual test coverage |")
-        buf.append("| Documentation Sync | Confluence docs exist — cross-check with ticket scope | Run documentation review sprint |")
+        buf.append("| Documentation Sync | Confluence docs exist â€” cross-check with ticket scope | Run documentation review sprint |")
 
     buf.append("\n### 5. Confluence / Documentation Analysis")
     if confluence_pages:
@@ -201,19 +201,19 @@ def _extract_analysis_from_docs(ingested_data: dict, instruction: str) -> str:
         buf.append("2. Align Confluence documentation with latest sprint scope.")
         buf.append("3. Ensure CI/CD pipelines are linked to Jira stories.")
 
-    buf.append(f"\n> ⚠️ *This analysis was generated without LLM — using keyword extraction from {len(ingested_data)} document(s). "
+    buf.append(f"\n> âš ï¸ *This analysis was generated without LLM â€” using keyword extraction from {len(ingested_data)} document(s). "
                "Configure GCP credentials in the Settings panel to enable full AI-powered analysis.*")
 
     return "\n".join(buf)
 
 
-# ── LLM-powered analysis ──────────────────────────────────────────────────
+# â”€â”€ LLM-powered analysis â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 def _llm_analysis(ingested_data: dict, instruction: str) -> str:
     from .llm import generate_report_analysis
     return generate_report_analysis(ingested_data, instruction)
 
 
-# ── Shared core: load docs, match skills, analyse, save ───────────────────
+# â”€â”€ Shared core: load docs, match skills, analyse, save â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 def _core_workflow(instruction: str, ingested_data: dict) -> str:
     matched_skills = find_matching_skills(instruction)
 
@@ -237,14 +237,14 @@ def run_workflow(instruction: str) -> str:
         console.print("[bold red]Instruction is too brief. Interactive elicitation required.[/bold red]")
         instruction = Prompt.ask("[bold magenta]Please provide more specific details or objectives[/bold magenta]")
 
-    console.print("[yellow]➔ Loading documents from input_docs/...[/yellow]")
+    console.print("[yellow]âž” Loading documents from input_docs/...[/yellow]")
     ingested_data = load_input_documents()
-    console.print(f"[green]✔ Loaded {len(ingested_data)} document source(s): {', '.join(ingested_data.keys())}[/green]")
+    console.print(f"[green]âœ” Loaded {len(ingested_data)} document source(s): {', '.join(ingested_data.keys())}[/green]")
 
-    console.print("[yellow]➔ Analysing document content...[/yellow]")
+    console.print("[yellow]âž” Analysing document content...[/yellow]")
     output_path = _core_workflow(instruction, ingested_data)
 
-    console.print(f"\n[bold green]✔ Report saved to:[/bold green] [underline]{output_path}[/underline]\n")
+    console.print(f"\n[bold green]âœ” Report saved to:[/bold green] [underline]{output_path}[/underline]\n")
     return output_path
 
 
@@ -253,131 +253,3 @@ def run_workflow_web(instruction: str) -> str:
     ingested_data = load_input_documents()
     return _core_workflow(instruction, ingested_data)
     
-    # Extract details from ingested text files (e.g., Jira tickets)
-    jira_content = ""
-    for filename, content in ingested_data.items():
-        if "jira" in filename.lower() or "ticket" in filename.lower():
-            jira_content += content + "\n"
-
-    # Dynamic content extraction hints
-    has_auth = "auth" in jira_content.lower() or "signup" in jira_content.lower()
-    has_playlist = "playlist" in jira_content.lower() or "music" in jira_content.lower()
-
-    analysis_buffer = []
-    
-    # Executive Summary
-    analysis_buffer.append("### 1. Executive Summary")
-    analysis_buffer.append("This document outlines the end-to-end system architecture, operational project flow, and backlog integration gaps derived from the synchronized Confluence documentation, GitHub repository files, and Jira board exports.")
-    
-    # Architecture & Flow
-    analysis_buffer.append("\n### 2. System Architecture & End-to-End Project Flow")
-    analysis_buffer.append("#### 2.1 Architectural Overview")
-    analysis_buffer.append("- **Presentation Layer:** Client-side user interfaces designed for media interaction and user navigation.")
-    analysis_buffer.append("- **Service Layer:** RESTful API backend handling business rules, user sessions, and core feature orchestration.")
-    analysis_buffer.append("- **Data Persistence Layer:** Secure relational storage for user profiles, credentials, playlists, and audio metadata.")
-    
-    analysis_buffer.append("\n#### 2.2 Execution Workflow")
-    analysis_buffer.append("1. **Client Interaction:** User triggers a request (e.g., User Authentication or Playlist Management via UI).")
-    analysis_buffer.append("2. **API Gateway & Routing:** Requests pass through validation middleware to enforce security and input sanitation.")
-    analysis_buffer.append("3. **Core Services Processing:** Business logic executes database transactions and queries.")
-    analysis_buffer.append("4. **Artifact Generation & Logging:** System status and audit trails output structured logs and BMAD markdown reports.")
-
-    # Scope Definition
-    analysis_buffer.append("\n### 3. Project Scope Definition")
-    analysis_buffer.append("- **In-Scope Features:**")
-    if has_auth:
-        analysis_buffer.append("  - User Authentication & Account Signup/Login flows.")
-    if has_playlist:
-        analysis_buffer.append("  - Playlist Creation, Track Management, and Media Streaming controls.")
-    analysis_buffer.append("  - Automated requirement tracing via BMAD orchestrator tools.")
-    analysis_buffer.append("- **Out-of-Scope / Deferred Items:**")
-    analysis_buffer.append("  - Advanced recommendation algorithms and cross-region database replication.")
-
-    # Jira Integration Gaps
-    analysis_buffer.append("\n### 4. Jira Integration & Backlog Gaps")
-    analysis_buffer.append("| Gap Type | Description / Context | Recommended Jira Action |")
-    analysis_buffer.append("| :--- | :--- | :--- |")
-    analysis_buffer.append("| **Acceptance Criteria Refinement** | Current Jira epics lack explicit edge-case error handling criteria. | Update ticket descriptions to specify failure responses (e.g., duplicate email checks). |")
-    analysis_buffer.append("| **Technical Debt Tracking** | Implementation files require dedicated sub-tasks for unit testing and CI/CD pipelines. | Create new testing stories linked to active Epics in Jira. |")
-    analysis_buffer.append("| **Documentation Sync** | Confluence system design docs diverge slightly from updated ticket scope. | Review and revise Confluence overview links. |")
-
-    # Recommendations
-    analysis_buffer.append("\n### 5. Architectural Recommendations & Next Steps")
-    analysis_buffer.append("1. **Modular Code Separation:** Ensure service logic remains cleanly decoupled from database connection utilities.")
-    analysis_buffer.append("2. **Jira Hygiene:** Regularly sync completed pull requests with corresponding ticket identifiers to eliminate tracking silos.")
-
-    final_analysis = "\n".join(analysis_buffer)
-
-    # 5. Format & Save output in BMAD standard MD format
-    output_path = save_bmad_markdown("Architecture_Scope_Report", instruction, matched_skills, ingested_data, final_analysis)
-    
-    console.print(f"\n[bold green]✔ Success! Detailed BMAD architecture report saved to:[/bold green] [underline]{output_path}[/underline]\n")
-    return output_path
-
-
-def run_workflow_web(instruction: str) -> str:
-    """
-    Headless variant used by the Flask web app.
-    Runs the full BMAD workflow and returns the output file path.
-    No rich console output is produced.
-    """
-    ingested_data = load_input_documents()
-    matched_skills = find_matching_skills(instruction)
-    top_skill = matched_skills[0]  # noqa: F841 – reserved for future use
-
-    jira_content = ""
-    for filename, content in ingested_data.items():
-        if "jira" in filename.lower() or "ticket" in filename.lower():
-            jira_content += content + "\n"
-
-    has_auth = "auth" in jira_content.lower() or "signup" in jira_content.lower()
-    has_playlist = "playlist" in jira_content.lower() or "music" in jira_content.lower()
-
-    analysis_buffer = []
-
-    analysis_buffer.append("### 1. Executive Summary")
-    analysis_buffer.append(
-        "This document outlines the end-to-end system architecture, operational project flow, "
-        "and backlog integration gaps derived from the synchronized Confluence documentation, "
-        "GitHub repository files, and Jira board exports."
-    )
-
-    analysis_buffer.append("\n### 2. System Architecture & End-to-End Project Flow")
-    analysis_buffer.append("#### 2.1 Architectural Overview")
-    analysis_buffer.append("- **Presentation Layer:** Client-side user interfaces designed for media interaction and user navigation.")
-    analysis_buffer.append("- **Service Layer:** RESTful API backend handling business rules, user sessions, and core feature orchestration.")
-    analysis_buffer.append("- **Data Persistence Layer:** Secure relational storage for user profiles, credentials, playlists, and audio metadata.")
-
-    analysis_buffer.append("\n#### 2.2 Execution Workflow")
-    analysis_buffer.append("1. **Client Interaction:** User triggers a request (e.g., User Authentication or Playlist Management via UI).")
-    analysis_buffer.append("2. **API Gateway & Routing:** Requests pass through validation middleware to enforce security and input sanitation.")
-    analysis_buffer.append("3. **Core Services Processing:** Business logic executes database transactions and queries.")
-    analysis_buffer.append("4. **Artifact Generation & Logging:** System status and audit trails output structured logs and BMAD markdown reports.")
-
-    analysis_buffer.append("\n### 3. Project Scope Definition")
-    analysis_buffer.append("- **In-Scope Features:**")
-    if has_auth:
-        analysis_buffer.append("  - User Authentication & Account Signup/Login flows.")
-    if has_playlist:
-        analysis_buffer.append("  - Playlist Creation, Track Management, and Media Streaming controls.")
-    analysis_buffer.append("  - Automated requirement tracing via BMAD orchestrator tools.")
-    analysis_buffer.append("- **Out-of-Scope / Deferred Items:**")
-    analysis_buffer.append("  - Advanced recommendation algorithms and cross-region database replication.")
-
-    analysis_buffer.append("\n### 4. Jira Integration & Backlog Gaps")
-    analysis_buffer.append("| Gap Type | Description / Context | Recommended Jira Action |")
-    analysis_buffer.append("| :--- | :--- | :--- |")
-    analysis_buffer.append("| **Acceptance Criteria Refinement** | Current Jira epics lack explicit edge-case error handling criteria. | Update ticket descriptions to specify failure responses (e.g., duplicate email checks). |")
-    analysis_buffer.append("| **Technical Debt Tracking** | Implementation files require dedicated sub-tasks for unit testing and CI/CD pipelines. | Create new testing stories linked to active Epics in Jira. |")
-    analysis_buffer.append("| **Documentation Sync** | Confluence system design docs diverge slightly from updated ticket scope. | Review and revise Confluence overview links. |")
-
-    analysis_buffer.append("\n### 5. Architectural Recommendations & Next Steps")
-    analysis_buffer.append("1. **Modular Code Separation:** Ensure service logic remains cleanly decoupled from database connection utilities.")
-    analysis_buffer.append("2. **Jira Hygiene:** Regularly sync completed pull requests with corresponding ticket identifiers to eliminate tracking silos.")
-
-    final_analysis = "\n".join(analysis_buffer)
-
-    output_path = save_bmad_markdown(
-        "Architecture_Scope_Report", instruction, matched_skills, ingested_data, final_analysis
-    )
-    return output_path
