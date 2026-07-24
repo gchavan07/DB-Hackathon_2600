@@ -1,0 +1,242 @@
+
+# 🎵 Jira Board: Spotify Clone
+
+## Epic 1: User Authentication
+### Ticket 1: Signup Flow
+Summary: Implement user signup with email/password
+Description: The signup flow allows new users to create an account using their email and password. It must validate inputs, prevent duplicate accounts, and securely store credentials using Firebase Authentication. The system should provide clear error messages for invalid inputs and confirm successful account creation with a welcome screen.
+Acceptance Criteria: Given a new user who has not registered before, When they enter a valid email and password into the signup form and submit, Then the system should create a new account, store credentials securely, and redirect them to the home screen with a confirmation message.
+Tasks: Create signup form; Validate inputs; Connect to Firebase Auth
+Status: Done
+Comments: Dev: "Signup integrated with Firebase." QA: "Tested with multiple email formats, works fine."
+
+### Ticket 2: Login Flow
+Summary: Implement login functionality
+Description: The login flow enables existing users to access their accounts using email and password. It must validate credentials, handle incorrect inputs gracefully, and maintain session persistence. The system should provide clear feedback for failed attempts and redirect successful logins to the main dashboard.
+Acceptance Criteria: Given a registered user with valid credentials, When they enter their email and password into the login form and submit, Then the system should authenticate them, establish a session, and redirect them to the home screen. If credentials are invalid, an error message should be displayed.
+Tasks: Build login form; Handle error messages; Session persistence
+Status: Done
+Comments: Dev: "Used Firebase session tokens." QA: "Logout/login tested across browsers."
+
+### Ticket 3: Logout Flow
+Summary: Implement logout functionality
+Description: The logout flow allows users to securely end their session. It must clear authentication tokens, invalidate active sessions, and redirect users to the login screen. The system should ensure no residual session data remains and provide confirmation that the user has logged out successfully.
+Acceptance Criteria: Given a logged-in user, When they click the logout button, Then the system should clear all session data, invalidate tokens, and redirect them to the login screen. The user should not be able to access authenticated pages without logging in again.
+Tasks: Add logout button; Clear session; Redirect to login
+Status: Done
+Comments: Dev: "Logout clears tokens." QA: "Session invalidated correctly."
+
+### Ticket 4: Password Reset
+Summary: Implement password reset
+Description: The password reset flow allows users to recover access to their accounts if they forget their password. It must provide a reset form, send a secure reset link via email, and allow users to set a new password. The system should validate reset tokens and confirm successful updates.
+Acceptance Criteria: Given a user who has forgotten their password, When they request a reset by entering their email, Then the system should send a secure reset link to their email. When the user clicks the link and enters a new password, Then the system should update their credentials and confirm success.
+Tasks: Add reset form; Connect to Firebase reset; Test email delivery
+Status: Done
+Comments: Dev: "Reset email configured." QA: "Verified reset flow."
+
+### Ticket 5: Session Persistence
+Summary: Keep users logged in
+Description: Session persistence ensures that users remain logged in across page reloads and browser restarts. It must securely store tokens, refresh them when expired, and handle invalid sessions gracefully. The system should provide a seamless experience without requiring frequent logins.
+Acceptance Criteria: Given a logged-in user with a valid session token, When they reload the app or reopen the browser, Then the system should automatically restore their session and redirect them to the home screen. If the token is expired, the system should refresh it or prompt for login.
+Tasks: Store token; Auto-refresh; Handle expiry
+Status: Done
+Comments: Dev: "Token refresh implemented." QA: "Session persists across reloads."
+
+---
+
+## Epic 2: Music Library
+### Ticket 6: Seed Database
+Summary: Populate DB with sample tracks
+Description: The database must be seeded with at least 100 sample tracks containing metadata such as title, artist, album, genre, and duration. This ensures the app has initial content for testing and user interaction. The schema must support scalability for future additions.
+Acceptance Criteria: Given the database setup, When queried for songs, Then the system should return a list of tracks with complete metadata including title, artist, album, genre, and duration. The data should be consistent and accessible via API endpoints.
+Tasks: Create schema; Insert mock data; Test API response
+Status: Done
+Comments: Dev: "Seeded DB with JSON dataset." QA: "Verified metadata fields."
+
+### Ticket 7: Library API
+Summary: Build API to fetch songs
+Description: The library API provides endpoints to fetch songs from the database. It must support pagination, filtering, and secure access. The API should return structured JSON responses with metadata fields and handle invalid requests gracefully.
+Acceptance Criteria: Given an authenticated API call to /songs, When requested with valid parameters, Then the system should return a paginated list of songs with metadata. If invalid parameters are provided, the system should return an error message.
+Tasks: Create endpoint /songs; Add pagination; Secure with auth
+Status: Done
+Comments: Dev: "Implemented with Node.js Express." QA: "Pagination tested."
+
+### Ticket 8: Album Metadata
+Summary: Add album info
+Description: Each song must include album metadata such as album name, release year, and cover art. This enhances the user experience by providing contextual information. The schema must be updated to store album details and API responses must include them.
+Acceptance Criteria: Given a song query, When returned via API, Then the response should include album metadata such as album name, release year, and cover art. The data should be accurate and displayed correctly in the UI.
+Tasks: Update schema; Add album field; Test response
+Status: Done
+Comments: Dev: "Album metadata added." QA: "Displayed correctly."
+
+### Ticket 9: Artist Metadata
+Summary: Add artist info
+Description: Each song must include artist metadata such as artist name, biography, and image. This provides users with richer context and supports future features like artist pages. The schema and API must be updated accordingly.
+Acceptance Criteria: Given a song query, When returned via API, Then the response should include artist metadata such as name, biography, and image. The data should be accurate and displayed correctly in the UI.
+Tasks: Update schema; Add artist field; Test response
+Status: Done
+Comments: Dev: "Artist metadata added." QA: "Displayed correctly."
+
+### Ticket 10: Genre Metadata
+Summary: Add genre info
+Description: Each song must include genre metadata to support filtering and recommendations. The schema must store genre information and API responses must include it. This enables users to browse songs by genre and supports future recommendation features.
+Acceptance Criteria: Given a song query, When returned via API, Then the response should include genre metadata. The data should be accurate and displayed correctly in the UI. Users should be able to filter songs by genre.
+Tasks: Update schema; Add genre field; Test response
+Status: Done
+Comments: Dev: "Genre metadata added." QA: "Displayed correctly."
+
+---
+
+## Epic 3: Search Functionality
+### Ticket 11: Basic Search
+Summary: Implement search by title/artist
+Description: The search functionality allows users to find songs by title or artist. It must support partial matches, case-insensitive queries, and return results quickly. The UI should display results in a structured format with metadata.
+Acceptance Criteria: Given a search input, When a user types a song title or artist name, Then the system should return matching songs with metadata. The search should be case-insensitive and support partial matches.
+Tasks: Add search bar; Filter client-side; Display results
+Status: Done
+Comments: Dev: "Simple filter implemented." QA: "Search returns expected matches."
+
+### Ticket 12: Search by Album
+Summary: Implement album search
+Description: Users should be able to search for songs by album name. The search must support partial matches and return all songs belonging to the album. The UI should group results by album.
+Acceptance Criteria: Given an album name input, When searched, Then the system should return all songs belonging to that album with metadata. The search should support partial matches and display results grouped by album.
+Tasks: Extend filter; Add album field; Display results
+Status: Done
+Comments: Dev: "Album search added." QA: "Results correct."
+
+### Ticket 13: Search by Genre
+Summary: Implement genre search
+Description: Users should be able to search for songs by genre. The search must return all songs matching the genre and support filtering. The UI should display results grouped by genre.
+Acceptance Criteria: Given a genre input, When searched, Then the system should return all songs matching that genre with metadata. The search should support filtering and display results grouped by genre.
+Tasks: Extend filter; Add genre field; Display results
+Status: Done
+Comments: Dev: "Genre search added." QA: "Results correct."
+
+### Ticket 14: Search API & Autocomplete
+Summary: Build search and Autocomplete API
+Description: The search API provides endpoints to query songs by title, artist, album, or genre. The search bar should autocomplete. It must also support filters, pagination, and secure access. The API should return structured JSON responses and handle invalid queries gracefully.
+Acceptance Criteria: Given an authenticated API call to /search, When requested with valid parameters, Then the system should return matching songs with metadata. If invalid parameters are provided, the system should return an error message.
+Tasks
+
+
+## Epic 4: Playback
+### Ticket 15: Search Autocomplete
+Summary: Add autocomplete
+Description: Autocomplete enhances the search experience by suggesting results as the user types. It must query the database in real time, handle partial matches, and display suggestions in a dropdown. This reduces typing effort and improves discoverability of songs, artists, and albums.
+Acceptance Criteria: Given a user typing into the search bar, When they enter at least three characters, Then the system should display a dropdown of suggested matches including songs, artists, and albums. Suggestions should update dynamically and be clickable to trigger full search results.
+Tasks: Add autocomplete UI; Connect to API; Test suggestions
+Status: Done
+Comments: Dev: "Autocomplete implemented." QA: "Suggestions accurate."
+
+### Ticket 16: Music Player
+Summary: Add play/pause functionality
+Description: The music player is the core playback component. It must support play, pause, and resume actions, handle audio buffering, and provide feedback to the user. The player should integrate with the UI seamlessly and maintain playback state across navigation.
+Acceptance Criteria: Given a song loaded in the player, When the user clicks play, Then the audio should start. When they click pause, Then playback should stop. When they click play again, Then playback should resume from the same position without errors.
+Tasks: Integrate HTML5 audio; Add controls; Handle errors
+Status: Done
+Comments: Dev: "Player integrated." QA: "Playback smooth."
+
+### Ticket 17: Next/Previous
+Summary: Add next/previous controls
+Description: Users must be able to skip forward or backward between songs in a playlist or queue. The system should update the playback state, load the correct track, and maintain continuity. Controls must be responsive and intuitive.
+Acceptance Criteria: Given a playlist with multiple songs, When the user clicks next, Then the player should load and play the next track. When they click previous, Then the player should load and play the previous track. Playback should transition smoothly without interruption.
+Tasks: Add buttons; Update player state; Test transitions
+Status: Done
+Comments: Dev: "Next/prev added." QA: "Transitions smooth."
+
+### Ticket 18: Progress Bar
+Summary: Add progress bar
+Description: The progress bar visually represents playback progress. It must update in real time, allow users to seek to different positions, and display elapsed and remaining time. The UI should be responsive and accurate.
+Acceptance Criteria: Given a song playing, When the user views the progress bar, Then it should update in real time. When the user drags the bar to a new position, Then playback should jump to that position and continue without errors.
+Tasks: Add bar UI; Sync with audio; Test updates
+Status: Done
+Comments: Dev: "Progress bar synced." QA: "Updates correctly."
+
+### Ticket 19: Volume Control
+Summary: Add volume control
+Description: Volume control allows users to adjust playback loudness. It must provide a slider UI, support incremental changes, and persist settings across sessions. The system should handle mute/unmute actions gracefully.
+Acceptance Criteria: Given a song playing, When the user adjusts the volume slider, Then the audio output should change accordingly. When they mute, Then playback should continue silently. When they unmute, Then volume should restore to the previous level.
+Tasks: Add slider; Connect to audio; Test levels
+Status: Done
+Comments: Dev: "Volume control added." QA: "Works fine."
+
+### Ticket 20: Shuffle/Repeat
+Summary: Add shuffle/repeat
+Description: Shuffle and repeat enhance playback flexibility. Shuffle randomizes the order of songs, while repeat allows continuous playback of a track or playlist. The system must update playback logic accordingly and provide clear UI indicators.
+Acceptance Criteria: Given a playlist, When shuffle is enabled, Then songs should play in random order. When repeat is enabled, Then the current track or playlist should loop continuously. The UI should reflect the active mode clearly.
+Tasks: Add buttons; Update logic; Test playback
+Status: Done
+Comments: Dev: "Shuffle/repeat added." QA: "Playback correct."
+
+---
+
+## Epic 5: Playlists
+### Ticket 21: Create Playlist
+Summary: Users can create playlists
+Description: Playlist creation allows users to curate collections of songs. The system must provide a UI for naming playlists, adding songs, and saving them to the database. Playlists should be tied to user accounts and accessible across sessions.
+Acceptance Criteria: Given a logged-in user, When they create a new playlist and add songs, Then the playlist should be saved to their account and accessible later. The system should confirm successful creation and display the playlist in the UI.
+Tasks: Build playlist model; Add UI; Save to Firestore
+Status: Done
+Comments: Dev: "Playlists stored per user." QA: "Create/edit/delete tested."
+
+### Ticket 22: Edit Playlist
+Summary: Users can edit playlists
+Description: Playlist editing allows users to rename playlists, reorder songs, and update metadata. The system must provide an intuitive UI and ensure changes are persisted in the database. Edits should be reflected immediately in the UI.
+Acceptance Criteria: Given an existing playlist, When the user edits its name or song order, Then the system should update the database and reflect changes in the UI. The system should confirm successful edits and maintain playlist integrity.
+Tasks: Add edit UI; Update DB; Test changes
+Status: Done
+Comments: Dev: "Edit implemented." QA: "Changes saved."
+
+### Ticket 23: Delete Playlist
+Summary: Users can delete playlists
+Description: Playlist deletion allows users to remove unwanted playlists. The system must confirm deletion, update the database, and remove the playlist from the UI. Deleted playlists should not be recoverable unless explicitly restored.
+Acceptance Criteria: Given an existing playlist, When the user clicks delete and confirms, Then the system should remove the playlist from the database and UI. The system should confirm successful deletion and prevent access to the deleted playlist.
+Tasks: Add delete UI; Update DB; Test removal
+Status: Done
+Comments: Dev: "Delete implemented." QA: "Removal correct."
+
+### Ticket 24: Add Songs to Playlist
+Summary: Add songs to playlist
+Description: Users must be able to add songs to existing playlists. The system should provide a UI for selecting songs and update the database accordingly. Additions should be reflected immediately in the playlist view.
+Acceptance Criteria: Given an existing playlist, When the user adds a song, Then the system should update the playlist in the database and display the new song in the UI. The system should confirm successful addition.
+Tasks: Add add-song UI; Update DB; Test addition
+Status: Done
+Comments: Dev: "Add songs implemented." QA: "Works fine."
+
+### Ticket 25: Remove Songs from Playlist
+Summary: Remove songs from playlist
+Description: Users must be able to remove songs from existing playlists. The system should provide a UI for removal and update the database accordingly. Removals should be reflected immediately in the playlist view.
+Acceptance Criteria: Given an existing playlist, When the user removes a song, Then the system should update the playlist in the database and remove the song from the UI. The system should confirm successful removal.
+Tasks: Add remove UI; Update DB; Test removal
+Status: Done
+Comments: Dev: "Remove songs implemented." QA: "Works fine."
+
+---
+
+## Epic 6: UI/UX
+### Ticket 26: Responsive Layout
+Summary: Build responsive UI
+Description: The app must adapt to different screen sizes and devices. It should use responsive design principles, adjust layouts dynamically, and ensure usability across mobile, tablet, and desktop. The design must maintain consistency and accessibility.
+Acceptance Criteria: Given a user on any device, When they load the app, Then the layout should adjust to fit the screen size while maintaining usability. Navigation and playback controls should remain accessible and functional.
+Tasks: Use Material UI; Test breakpoints
+Status: Done
+Comments: Dev: "Material UI used." QA: "Responsive verified."
+
+### Ticket 27: Navigation Bar
+Summary: Add navigation bar
+Description: The navigation bar provides access to core sections such as Home, Search, Library, and Playlists. It must be intuitive, responsive, and highlight the active section. The design should be consistent across devices.
+Acceptance Criteria: Given a user navigating the app, When they click a section in the nav bar, Then the system should load the corresponding view and highlight the active section. Navigation should be smooth and responsive.
+Tasks: Build nav bar; Add links; Test navigation
+Status: Done
+Comments: Dev: "Nav bar added." QA: "Navigation smooth."
+
+### Ticket 28: Home Screen
+Summary: Build home screen
+Description: The home screen serves as the landing page after login. It must display featured playlists, recently played songs, and personalized recommendations. The design should be engaging and provide quick access to playback and search.
+Acceptance Criteria: Given a logged-in user, When they access the home screen, Then the system should display featured playlists, recently played songs, and recommendations. The layout should be responsive and interactive.
+Tasks: Design layout; Fetch data; Display content
+Status: Done
+Comments: Dev: "Home screen implemented." QA: "Content displays correctly."
+
+Jira - complete tickets.txt
+Displaying Jira - complete tickets.txt.
