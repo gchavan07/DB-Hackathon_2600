@@ -1,0 +1,88 @@
+# ── OpenShift Deployment Manifests ───────────────────────────────────────
+# Apply with:  oc apply -f openshift.yaml
+# Or import image and let OpenShift generate a DeploymentConfig.
+#
+# Quick deploy via CLI:
+#   oc new-project bmad          (create project/namespace)
+#   oc new-app . --name bmad-app (build from local Dockerfile)
+#   oc expose svc/bmad-app       (create public Route)
+#   oc get route bmad-app        (get the public URL)
+# ─────────────────────────────────────────────────────────────────────────
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bmad-app
+  labels:
+    app: bmad-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bmad-app
+  template:
+    metadata:
+      labels:
+        app: bmad-app
+    spec:
+      containers:
+        - name: bmad-app
+          image: bmad-app:latest # replace with your registry image
+          ports:
+            - containerPort: 8080
+          env:
+            - name: PORT
+              value: "8080"
+            - name: HOST
+              value: "0.0.0.0"
+            # Uncomment and set your GCP project if not using the Settings UI:
+            # - name: GOOGLE_CLOUD_PROJECT
+            #   value: "your-gcp-project-id"
+            # - name: GOOGLE_APPLICATION_CREDENTIALS
+            #   value: "/secrets/adc/application_default_credentials.json"
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 20
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: bmad-app
+spec:
+  selector:
+    app: bmad-app
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+---
+# OpenShift Route – exposes the service on a public URL automatically
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: bmad-app
+spec:
+  to:
+    kind: Service
+    name: bmad-app
+  port:
+    targetPort: 8080
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
