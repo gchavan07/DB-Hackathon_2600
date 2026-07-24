@@ -232,6 +232,90 @@ def _resolve_project() -> str:
 LOCATION = os.environ.get("VERTEX_LOCATION", "us-central1")
 MODEL_ID  = os.environ.get("VERTEX_MODEL",    "gemini-2.5-flash")
 
+# ── Report analysis prompt ────────────────────────────────────────────────
+
+REPORT_PROMPT_TEMPLATE = """
+You are a senior software architect and technical documentation expert.
+Carefully read ALL of the project documents provided below and generate a comprehensive,
+detailed technical report that is FULLY based on the actual content of these documents.
+
+Do NOT use generic boilerplate. Every statement must be grounded in the provided documents.
+
+Your report MUST include the following sections:
+
+### 1. Executive Summary
+Summarize the project's purpose, goals, and key stakeholders based on the documents.
+
+### 2. System Architecture & End-to-End Project Flow
+#### 2.1 Architectural Overview
+Describe the actual tech stack, layers, and components found in the documents.
+#### 2.2 Execution Workflow
+Describe the actual step-by-step flow derived from the documents.
+
+### 3. Project Scope Definition
+List the actual in-scope features, epics, and tickets found. List deferred/out-of-scope items.
+
+### 4. Jira / Ticket Integration & Backlog Gaps
+Using the Jira/ticket data, identify gaps, missing acceptance criteria, unlinked stories, and blockers.
+Present findings as a markdown table.
+
+### 5. Confluence / Documentation Analysis
+Summarize what the Confluence/wiki docs say. Note any inconsistencies with the Jira data.
+
+### 6. Code & Implementation Analysis
+Summarize the code files or architecture descriptions found. Call out design patterns, APIs, and tech choices.
+
+### 7. Risks, Issues & Recommendations
+List concrete risks found in the documents and specific actionable recommendations.
+
+### 8. Next Steps
+Provide a prioritised list of next steps derived from the document content.
+
+OUTPUT FORMAT:
+- Use clean Markdown with proper headings.
+- Use bullet points, numbered lists, and tables where appropriate.
+- Be specific — use actual names, ticket IDs, feature names, and tech stack details from the documents.
+
+--- PROJECT DOCUMENTS ---
+{context}
+--- END OF DOCUMENTS ---
+
+User's specific instruction / focus area: {instruction}
+"""
+
+
+def generate_report_analysis(ingested_docs: dict, instruction: str) -> str:
+    """
+    Uses Gemini 2.5 Flash to analyze the actual ingested documents and
+    return a comprehensive, document-grounded markdown analysis string.
+    """
+    _resolve_credentials()
+    project  = _resolve_project()
+    settings = load_settings()
+    location = settings.get("vertex_location", LOCATION).strip() or LOCATION
+
+    vertexai.init(project=project, location=location)
+
+    # Build context — include as much content as possible (cap at 50k chars)
+    context_parts = []
+    total = 0
+    for filename, content in ingested_docs.items():
+        if content.startswith("[Error") or content.startswith("[python-docx"):
+            continue
+        snippet = f"=== FILE: {filename} ===\n{content[:8000]}"
+        total += len(snippet)
+        context_parts.append(snippet)
+        if total > 50000:
+            break
+
+    context = "\n\n".join(context_parts)
+    prompt  = REPORT_PROMPT_TEMPLATE.format(context=context, instruction=instruction)
+
+    model    = GenerativeModel(MODEL_ID)
+    response = model.generate_content(prompt)
+    return response.text.strip()
+
+
 # ── Diagram generation ────────────────────────────────────────────────────
 
 DIAGRAM_PROMPT_TEMPLATE = """
@@ -262,8 +346,12 @@ def generate_architecture_diagram(ingested_docs: dict) -> str:
     Calls Gemini 2.5 Flash via Vertex AI ADC to generate a Mermaid architecture diagram.
     Returns the raw Mermaid diagram string (without the ```mermaid fence).
     """
-    project = _resolve_project()
-    vertexai.init(project=project, location=LOCATION)
+    _resolve_credentials()
+    project  = _resolve_project()
+    settings = load_settings()
+    location = settings.get("vertex_location", LOCATION).strip() or LOCATION
+
+    vertexai.init(project=project, location=location)
 
     # Build context from all ingested documents (cap at ~12k chars to stay within limits)
     context_parts = []
