@@ -4,5 +4,6 @@ PyYAML>=6.0
 flask>=3.0.0
 markdown2>=2.4.0
 werkzeug>=3.0.0
+gunicorn>=22.0.0
 google-cloud-aiplatform>=1.60.0
 vertexai>=1.60.0

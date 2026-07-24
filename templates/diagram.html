@@ -422,6 +422,31 @@
                 />
                 <span class="field-hint">Default: us-central1</span>
               </div>
+              <div class="settings-field" style="flex: 2; min-width: 320px">
+                <label
+                  >ADC Credentials File Path
+                  <span style="color: #f6ad55">★</span></label
+                >
+                <input
+                  type="text"
+                  name="credentials_path"
+                  value="{{ credentials_path }}"
+                  placeholder="/home/user/.config/gcloud/application_default_credentials.json"
+                />
+                <span class="field-hint"
+                  >Full path to your
+                  <code
+                    style="
+                      background: #0f1117;
+                      color: #68d391;
+                      padding: 1px 4px;
+                      border-radius: 3px;
+                    "
+                    >application_default_credentials.json</code
+                  >
+                  file</span
+                >
+              </div>
               <div style="display: flex; align-items: flex-end">
                 <button type="submit" class="btn btn-primary">
                   💾 Save Settings
@@ -430,15 +455,13 @@
             </div>
           </form>
           <div class="settings-hint">
-            <strong>How to get your Project ID:</strong>
-            Run <code>gcloud config get-value project</code> in a terminal, or
-            check
-            <a
-              href="https://console.cloud.google.com"
-              target="_blank"
-              style="color: #63b3ed"
-              >console.cloud.google.com</a
-            >. Make sure ADC is configured:
+            <strong>Credentials file location:</strong> Your ADC credentials
+            were created at<br />
+            <code
+              >/home/chavangaurav747234_gmail_com/.config/gcloud/application_default_credentials.json</code
+            ><br />
+            Paste that path in the <em>ADC Credentials File Path</em> field
+            above, then save. If you need to re-authenticate, run:
             <code>gcloud auth application-default login</code>
           </div>
         </div>

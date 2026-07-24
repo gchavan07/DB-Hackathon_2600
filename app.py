@@ -1,7 +1,8 @@
 """
 BMAD Agent Orchestrator – Browser-Based Web Application
-Run with:  python app.py
-Then open: http://localhost:5000
+
+Local:     python app.py  →  http://localhost:5000
+OpenShift: deployed via gunicorn, binds to 0.0.0.0:$PORT (default 8080)
 """
 
 import os
@@ -14,11 +15,19 @@ from src.ingester import load_input_documents
 from src.llm import generate_architecture_diagram, load_settings, save_settings
 from src.config import INPUT_DOCS_DIR, OUTPUT_DIR
 
+# ── Runtime config ────────────────────────────────────────────────────────
+# OpenShift / Kubernetes inject PORT; fall back to 5000 for local dev.
+PORT       = int(os.environ.get("PORT", 5000))
+HOST       = os.environ.get("HOST", "0.0.0.0")
+# Disable debug mode when running in a cloud environment
+IS_CLOUD   = os.environ.get("OPENSHIFT_BUILD_NAME") or os.environ.get("K_SERVICE") or os.environ.get("DYNO")
+DEBUG_MODE = not bool(IS_CLOUD)
+
 # Store latest diagram in memory (simple single-user cache)
 _diagram_cache: dict = {"mermaid": None}
 
 app = Flask(__name__)
-app.secret_key = "bmad-secret-key-2026"
+app.secret_key = os.environ.get("SECRET_KEY", "bmad-secret-key-2026-local")
 
 ALLOWED_EXTENSIONS = {"txt", "md", "json", "text", "py", "yaml", "yml"}
 
@@ -136,8 +145,8 @@ def diagram():
             mermaid_code = generate_architecture_diagram(ingested)
             _diagram_cache["mermaid"] = mermaid_code
             flash("Architecture diagram generated successfully!", "success")
-        except EnvironmentError as e:
-            flash(f"ADC config error: {str(e)}", "error")
+        except (EnvironmentError, FileNotFoundError) as e:
+            flash(f"Configuration error: {str(e)}", "error")
         except Exception as e:
             flash(f"LLM error: {str(e)}", "error")
     settings = load_settings()
@@ -146,6 +155,7 @@ def diagram():
         diagram=_diagram_cache.get("mermaid"),
         gcp_project=settings.get("gcp_project", ""),
         vertex_location=settings.get("vertex_location", "us-central1"),
+        credentials_path=settings.get("credentials_path", ""),
     )
 
 
@@ -153,11 +163,19 @@ def diagram():
 def save_settings_route():
     gcp_project      = request.form.get("gcp_project", "").strip()
     vertex_location  = request.form.get("vertex_location", "us-central1").strip()
+    credentials_path = request.form.get("credentials_path", "").strip()
     if not gcp_project:
         flash("Project ID cannot be empty.", "error")
         return redirect(url_for("diagram"))
-    save_settings({"gcp_project": gcp_project, "vertex_location": vertex_location})
-    flash(f"Settings saved. Project set to: {gcp_project}", "success")
+    if credentials_path and not os.path.isfile(credentials_path):
+        flash(f"Credentials file not found at: {credentials_path}", "error")
+        return redirect(url_for("diagram"))
+    save_settings({
+        "gcp_project":      gcp_project,
+        "vertex_location":  vertex_location,
+        "credentials_path": credentials_path,
+    })
+    flash(f"Settings saved. Project: {gcp_project}", "success")
     return redirect(url_for("diagram"))
 
 
@@ -170,5 +188,5 @@ def api_reports():
 if __name__ == "__main__":
     os.makedirs(INPUT_DOCS_DIR, exist_ok=True)
     os.makedirs(OUTPUT_DIR, exist_ok=True)
-    print("🚀  BMAD Web App running at http://localhost:5000")
-    app.run(debug=True, port=5000)
+    print(f"🚀  BMAD Web App running at http://{HOST}:{PORT}  (debug={DEBUG_MODE})")
+    app.run(host=HOST, port=PORT, debug=DEBUG_MODE)
